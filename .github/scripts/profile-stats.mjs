@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { setTimeout as wait } from "node:timers/promises";
 import { calendarStart, renderContributionHeatmap } from "./contribution-heatmap.mjs";
+import { ICONS, rankOf, renderStatsCard } from "./stats-card.mjs";
 
 const token = process.env.STATS_TOKEN;
 const login = process.env.STATS_LOGIN;
@@ -35,7 +36,8 @@ const ACCOUNT_QUERY = `
 query ($login: String!) {
   user(login: $login) {
     name
-    repositories(first: 100, ownerAffiliations: OWNER) { nodes { ${REPOSITORY_FIELDS} } }
+    followers { totalCount }
+    repositories(first: 100, ownerAffiliations: OWNER) { nodes { stargazerCount ${REPOSITORY_FIELDS} } }
     repositoriesContributedTo(first: 100, includeUserRepositories: true, contributionTypes: [COMMIT, PULL_REQUEST]) {
       nodes { ${REPOSITORY_FIELDS} }
     }
@@ -142,6 +144,11 @@ async function pullRequestCount(qualifiers) {
   return data.search.issueCount;
 }
 
+async function issueCount(qualifiers) {
+  const data = await queryGitHub(ISSUE_COUNT_QUERY, { query: `is:issue ${qualifiers}` });
+  return data.search.issueCount;
+}
+
 async function pullRequestRepositories() {
   const repositories = [];
   let cursor = null;
@@ -194,18 +201,8 @@ function topLanguages(weights, limit) {
     .slice(0, limit);
 }
 
-function oneYearAgo(now) {
-  const date = new Date(now);
-  date.setUTCFullYear(date.getUTCFullYear() - 1);
-  return date.toISOString().slice(0, 10);
-}
-
 function escapeXml(text) {
   return String(text).replace(/[<>&"']/g, (character) => `&#${character.charCodeAt(0)};`);
-}
-
-function formatNumber(value) {
-  return new Intl.NumberFormat("pt-BR").format(value);
 }
 
 function cardFrame(title, subtitle, body) {
@@ -223,18 +220,6 @@ function cardFrame(title, subtitle, body) {
   <text x="25" y="53" class="subtitle">${escapeXml(subtitle)}</text>
   ${body}
 </svg>`;
-}
-
-function statsCard(name, rows, generatedAt) {
-  const body = rows
-    .map((row, index) => {
-      const y = 85 + index * 25;
-      return `<circle cx="32" cy="${y - 5}" r="4" fill="${palette.icon}"/>
-  <text x="45" y="${y}" class="label">${escapeXml(row.label)}</text>
-  <text x="470" y="${y}" class="value" text-anchor="end">${escapeXml(formatNumber(row.value))}</text>`;
-    })
-    .join("\n  ");
-  return cardFrame(`${name} · GitHub Stats`, `Inclui repositórios privados e da V4 Company · atualizado em ${generatedAt}`, body);
 }
 
 function languagesCard(languages) {
@@ -275,20 +260,38 @@ async function main() {
     ...(await pullRequestRepositories()),
   ]);
   const contributions = await repositoriesWithCommits(repositories);
-  const rows = [
-    { label: "Commits (total)", value: await commitCount("") },
-    { label: "Commits nos últimos 12 meses", value: await commitCount(`committer-date:>${oneYearAgo(now)}`) },
-    { label: "Commits na V4 Company", value: await commitCount(`org:${organization}`) },
-    { label: "Pull requests", value: await pullRequestCount(`author:${login}`) },
-    { label: "Code reviews", value: await pullRequestCount(`reviewed-by:${login} -author:${login}`) },
-    { label: "Repositórios com contribuição", value: contributions.length },
+  const activity = {
+    commits: await commitCount(""),
+    organizationCommits: await commitCount(`org:${organization}`),
+    pullRequests: await pullRequestCount(`author:${login}`),
+    reviews: await pullRequestCount(`reviewed-by:${login} -author:${login}`),
+    issues: await issueCount(`author:${login}`),
+    stars: user.repositories.nodes.reduce((sum, repository) => sum + repository.stargazerCount, 0),
+    followers: user.followers.totalCount,
+  };
+  const items = [
+    { icon: ICONS.commits, label: "Commits (total)", value: activity.commits },
+    { icon: ICONS.commits, label: "Commits na V4", value: activity.organizationCommits },
+    { icon: ICONS.pullRequests, label: "Pull requests", value: activity.pullRequests },
+    { icon: ICONS.reviews, label: "Code reviews", value: activity.reviews },
+    { icon: ICONS.issues, label: "Issues", value: activity.issues },
+    { icon: ICONS.repositories, label: "Contribuiu em", value: contributions.length },
   ];
   const generatedAt = now.toLocaleDateString("pt-BR", { timeZone: TIME_ZONE });
   const today = localDate(now);
   const dailyCounts = await dailyCommitCounts(today);
   const total = [...dailyCounts.values()].reduce((sum, count) => sum + count, 0);
   await mkdir(outputDirectory, { recursive: true });
-  await writeFile(`${outputDirectory}/stats.svg`, statsCard(user.name ?? login, rows, generatedAt));
+  await writeFile(
+    `${outputDirectory}/stats.svg`,
+    renderStatsCard({
+      title: `${user.name ?? login} · GitHub Stats`,
+      subtitle: `Inclui repositórios privados e da V4 Company · atualizado em ${generatedAt}`,
+      items,
+      rank: rankOf(activity),
+      palette,
+    }),
+  );
   await writeFile(
     `${outputDirectory}/contributions.svg`,
     renderContributionHeatmap({ dailyCounts, today, total, palette, subtitle: `Inclui repositórios privados e da V4 Company · atualizado em ${generatedAt}` }),
