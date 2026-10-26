@@ -8,6 +8,7 @@ const outputDirectory = process.env.STATS_OUTPUT ?? "dist";
 const SEARCH_INTERVAL_MS = 2200;
 const MAX_ATTEMPTS = 4;
 const RETRY_DELAY_MS = 5000;
+const CARD_HEIGHT = 235;
 
 const palette = {
   background: "#161b22",
@@ -149,7 +150,8 @@ function formatNumber(value) {
   return new Intl.NumberFormat("pt-BR").format(value);
 }
 
-function cardFrame(title, subtitle, height, body) {
+function cardFrame(title, subtitle, body) {
+  const height = CARD_HEIGHT;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="495" height="${height}" viewBox="0 0 495 ${height}" role="img" aria-label="${escapeXml(title)}">
   <style>
     .title { font: 600 18px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.title}; }
@@ -174,13 +176,12 @@ function statsCard(name, rows, generatedAt) {
   <text x="470" y="${y}" class="value" text-anchor="end">${escapeXml(formatNumber(row.value))}</text>`;
     })
     .join("\n  ");
-  return cardFrame(`${name} · GitHub Stats`, `Inclui repositórios privados e da V4 Company · atualizado em ${generatedAt}`, 85 + rows.length * 25, body);
+  return cardFrame(`${name} · GitHub Stats`, `Inclui repositórios privados e da V4 Company · atualizado em ${generatedAt}`, body);
 }
 
 function languagesCard(languages) {
   const legend = languages.map((language, index) => languageLegend(language, index)).join("\n  ");
-  const rows = Math.ceil(languages.length / 2);
-  return cardFrame("Linguagens mais usadas", "Ponderado pelos seus commits em cada repositório", 110 + rows * 24, `${progressBar(languages)}\n  ${legend}`);
+  return cardFrame("Linguagens mais usadas", "Ponderado pelos seus commits em cada repositório", `${progressBar(languages)}\n  ${legend}`);
 }
 
 function progressBar(languages) {
@@ -198,7 +199,7 @@ function progressBar(languages) {
 
 function languageLegend(language, index) {
   const x = 25 + (index % 2) * 230;
-  const y = 105 + Math.floor(index / 2) * 24;
+  const y = 112 + Math.floor(index / 2) * 32;
   const percent = (language.share * 100).toFixed(2);
   return `<circle cx="${x + 5}" cy="${y - 4}" r="5" fill="${language.color}"/>
   <text x="${x + 16}" y="${y}" class="language">${escapeXml(language.name)} ${percent}%</text>`;

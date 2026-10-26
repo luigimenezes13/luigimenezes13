@@ -73,8 +73,8 @@ const luigi = {
 ### 📊 GitHub em números
 
 <p align="center">
-  <img height="190" src="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/refs/heads/stats/stats.svg" alt="GitHub stats" />
-  <img height="190" src="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/refs/heads/stats/languages.svg" alt="Linguagens mais usadas" />
+  <img width="49%" src="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/refs/heads/stats/stats.svg" alt="GitHub stats" />
+  <img width="49%" src="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/refs/heads/stats/languages.svg" alt="Linguagens mais usadas" />
 </p>
 
 ### 🐍 Contribuições
