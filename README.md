@@ -77,8 +77,4 @@ const luigi = {
   <img height="170" src="https://github-readme-stats.vercel.app/api/top-langs/?username=luigimenezes13&layout=compact&langs_count=8&theme=tokyonight&hide_border=true&border_radius=12" />
 </p>
 
-<p align="center">
-  <img src="https://streak-stats.demolab.com?user=luigimenezes13&theme=tokyonight&hide_border=true&border_radius=12&date_format=j%20M%5B%20Y%5D" />
-</p>
-
 <img src="https://capsule-render.vercel.app/api?type=waving&height=120&color=0:7aa2f7,50:bb9af7,100:f7768e&section=footer" width="100%" />
