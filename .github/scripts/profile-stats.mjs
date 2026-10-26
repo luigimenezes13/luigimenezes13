@@ -315,7 +315,7 @@ async function main() {
   await writeFile(
     `${outputDirectory}/stats.svg`,
     renderStatsCard({
-      title: `${user.name ?? login} · GitHub Stats`,
+      title: "Atividade no GitHub",
       subtitle: `Inclui repositórios privados e da V4 Company · atualizado em ${generatedAt}`,
       items,
       rank: rankOf(activity),
