@@ -1,0 +1,38 @@
+[
+  {
+    "repository": "luigimenezes13/OpenFinance",
+    "title": "Financial Manager",
+    "description": "Gestor de gastos pessoais integrado ao Open Finance brasileiro via Pluggy. Estudo público de DDD, Clean Architecture e SOLID em Go idiomático.",
+    "tags": ["Go", "DDD", "Open Finance", "Pluggy"]
+  },
+  {
+    "repository": "luigimenezes13/lpr-microservice",
+    "title": "LPR · Monitor de vagas",
+    "description": "Visão computacional embarcada no Raspberry Pi: detecta veículos com YOLOv8, lê placas com PaddleOCR e publica eventos de vaga.",
+    "tags": ["Python", "YOLOv8", "PaddleOCR", "Raspberry Pi"]
+  },
+  {
+    "repository": "luigimenezes13/parking",
+    "title": "Parking API",
+    "description": "API de estacionamento com DDD e Clean Architecture: Fastify, Inversify e Prisma/Kysely, com domínio isolado de framework.",
+    "tags": ["TypeScript", "Fastify", "Prisma", "DDD"]
+  },
+  {
+    "repository": "luigimenezes13/trainees",
+    "title": "V4 Mars Astronauts Training",
+    "description": "Trilha de onboarding backend dos trainees da V4: DDD, Clean Architecture e arquitetura orientada a eventos na prática.",
+    "tags": ["TypeScript", "DDD", "EDA", "Onboarding"]
+  },
+  {
+    "repository": "luigimenezes13/go-katas",
+    "title": "Go Katas",
+    "description": "Katas de aprendizado em Go: design patterns, idiomas da linguagem e SOLID, DDD e Clean Architecture aplicados ao ecossistema Go.",
+    "tags": ["Go", "Design Patterns", "SOLID"]
+  },
+  {
+    "repository": "luigimenezes13/portfolio-dossie",
+    "title": "Dossiê Profissional",
+    "description": "Frontend do sistema de dossiês profissionais, com React 19, TypeScript, Vite e Tailwind CSS.",
+    "tags": ["React", "TypeScript", "Vite", "Tailwind"]
+  }
+]

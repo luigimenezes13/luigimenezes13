@@ -42,33 +42,20 @@ const luigi = {
 
 ### 🚀 Projetos em destaque
 
-<table>
-  <tr>
-    <td width="50%" valign="top">
-      <a href="https://github.com/luigimenezes13/parking"><b>🅿️ parking</b></a><br/>
-      <sub>API de estacionamento com DDD + Clean Architecture: Fastify, Inversify, Prisma/Kysely.</sub><br/><br/>
-      <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white" />
-      <img src="https://img.shields.io/badge/Fastify-000000?style=flat-square&logo=fastify&logoColor=white" />
-    </td>
-    <td width="50%" valign="top">
-      <a href="https://github.com/luigimenezes13/go-katas"><b>🥋 go-katas</b></a><br/>
-      <sub>Katas em Go: design patterns, idiomas e SOLID/DDD/Clean Arch aplicados ao ecossistema Go.</sub><br/><br/>
-      <img src="https://img.shields.io/badge/Go-00ADD8?style=flat-square&logo=go&logoColor=white" />
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <a href="https://github.com/luigimenezes13/OpenFinance"><b>🏦 OpenFinance</b></a><br/>
-      <sub>Explorando o ecossistema de Open Finance em Go.</sub><br/><br/>
-      <img src="https://img.shields.io/badge/Go-00ADD8?style=flat-square&logo=go&logoColor=white" />
-    </td>
-    <td width="50%" valign="top">
-      <a href="https://github.com/luigimenezes13/SortHell"><b>🔥 SortHell</b></a><br/>
-      <sub>Benchmark de runtime dos mais diversos algoritmos de ordenação.</sub><br/><br/>
-      <img src="https://img.shields.io/badge/C-A8B9CC?style=flat-square&logo=c&logoColor=black" />
-    </td>
-  </tr>
-</table>
+<p align="center">
+  <a href="https://github.com/luigimenezes13/OpenFinance"><img width="49%" src="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/refs/heads/stats/projects/OpenFinance.svg" alt="Financial Manager" /></a>
+  <a href="https://github.com/luigimenezes13/lpr-microservice"><img width="49%" src="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/refs/heads/stats/projects/lpr-microservice.svg" alt="LPR · Monitor de vagas" /></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/luigimenezes13/parking"><img width="49%" src="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/refs/heads/stats/projects/parking.svg" alt="Parking API" /></a>
+  <a href="https://github.com/luigimenezes13/trainees"><img width="49%" src="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/refs/heads/stats/projects/trainees.svg" alt="V4 Mars Astronauts Training" /></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/luigimenezes13/go-katas"><img width="49%" src="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/refs/heads/stats/projects/go-katas.svg" alt="Go Katas" /></a>
+  <a href="https://github.com/luigimenezes13/portfolio-dossie"><img width="49%" src="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/refs/heads/stats/projects/portfolio-dossie.svg" alt="Dossiê Profissional" /></a>
+</p>
 
 ### 📊 GitHub em números
 

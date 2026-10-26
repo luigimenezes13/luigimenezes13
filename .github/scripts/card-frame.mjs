@@ -9,8 +9,8 @@ export function formatNumber(value) {
   return new Intl.NumberFormat("pt-BR").format(value);
 }
 
-export function renderCard({ title, subtitle, palette, styles = "", body }) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${CARD_WIDTH}" height="${CARD_HEIGHT}" viewBox="0 0 ${CARD_WIDTH} ${CARD_HEIGHT}" role="img" aria-label="${escapeXml(title)}">
+export function renderCard({ title, subtitle, palette, styles = "", body, height = CARD_HEIGHT }) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${CARD_WIDTH}" height="${height}" viewBox="0 0 ${CARD_WIDTH} ${height}" role="img" aria-label="${escapeXml(title)}">
   <style>
     .title { font: 600 18px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.title}; }
     .subtitle { font: 400 11px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.muted}; }
@@ -20,7 +20,7 @@ export function renderCard({ title, subtitle, palette, styles = "", body }) {
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     ${styles}
   </style>
-  <rect width="${CARD_WIDTH}" height="${CARD_HEIGHT}" rx="12" fill="${palette.background}"/>
+  <rect width="${CARD_WIDTH}" height="${height}" rx="12" fill="${palette.background}"/>
   <text x="25" y="35" class="title">${escapeXml(title)}</text>
   <text x="25" y="53" class="subtitle">${escapeXml(subtitle)}</text>
   ${body}

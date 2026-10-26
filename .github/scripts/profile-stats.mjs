@@ -1,9 +1,10 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { setTimeout as wait } from "node:timers/promises";
 import { calendarDays, calendarStart, renderContributionHeatmap } from "./contribution-heatmap.mjs";
 import { renderLanguagesCard } from "./languages-card.mjs";
 import { renderProductiveTimeCard } from "./productive-time-card.mjs";
 import { renderStreakCard } from "./streak-card.mjs";
+import { ACTIVITY_MONTHS, monthlyCommits, renderProjectCard } from "./project-card.mjs";
 import { ICONS, rankOf, renderStatsCard } from "./stats-card.mjs";
 
 const token = process.env.STATS_TOKEN;
@@ -51,6 +52,24 @@ query ($query: String!, $cursor: String) {
   search(type: ISSUE, query: $query, first: 50, after: $cursor) {
     pageInfo { hasNextPage endCursor }
     nodes { ... on PullRequest { repository { ${REPOSITORY_FIELDS} } } }
+  }
+}`;
+
+const PROJECT_QUERY = `
+query ($owner: String!, $name: String!, $since: GitTimestamp!) {
+  repository(owner: $owner, name: $name) {
+    stargazerCount
+    pushedAt
+    homepageUrl
+    primaryLanguage { name color }
+    defaultBranchRef {
+      target {
+        ... on Commit {
+          all: history(first: 0) { totalCount }
+          recent: history(first: 100, since: $since) { nodes { committedDate } }
+        }
+      }
+    }
   }
 }`;
 
@@ -216,11 +235,42 @@ function topLanguages(weights, limit) {
     .slice(0, limit);
 }
 
+async function featuredProjects(now) {
+  const configuration = JSON.parse(await readFile(new URL("../projects.json", import.meta.url), "utf8"));
+  const since = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - (ACTIVITY_MONTHS - 1), 1)).toISOString();
+  const projects = [];
+  for (const entry of configuration) {
+    const [owner, name] = entry.repository.split("/");
+    const { repository } = await queryGitHub(PROJECT_QUERY, { owner, name, since });
+    const history = repository.defaultBranchRef.target;
+    projects.push({
+      ...entry,
+      name,
+      stars: repository.stargazerCount,
+      pushedAt: repository.pushedAt,
+      homepage: repository.homepageUrl,
+      language: repository.primaryLanguage ?? { name: "—", color: palette.muted },
+      totalCommits: history.all.totalCount,
+      months: monthlyCommits(history.recent.nodes.map((node) => node.committedDate), now),
+    });
+  }
+  return projects;
+}
+
+async function writeProjectCards(now) {
+  await mkdir(`${outputDirectory}/projects`, { recursive: true });
+  for (const project of await featuredProjects(now)) {
+    await writeFile(`${outputDirectory}/projects/${project.name}.svg`, renderProjectCard({ project, now, palette }));
+  }
+}
+
 async function main() {
   if (!token || !login || !organization) {
     throw new Error("STATS_TOKEN, STATS_LOGIN and STATS_ORGANIZATION must be set");
   }
   const now = new Date();
+  await writeProjectCards(now);
+  if (process.env.STATS_ONLY_PROJECTS === "true") return;
   const { user } = await queryGitHub(ACCOUNT_QUERY, { login });
   const repositories = distinctRepositories([
     ...user.repositories.nodes,
