@@ -1,0 +1,225 @@
+import { mkdir, writeFile } from "node:fs/promises";
+import { setTimeout as wait } from "node:timers/promises";
+
+const token = process.env.STATS_TOKEN;
+const login = process.env.STATS_LOGIN;
+const organization = process.env.STATS_ORGANIZATION;
+const outputDirectory = process.env.STATS_OUTPUT ?? "dist";
+const SEARCH_INTERVAL_MS = 2200;
+
+const palette = {
+  background: "#161b22",
+  title: "#ff4d5a",
+  icon: "#ff4d5a",
+  text: "#c9d1d9",
+  muted: "#8b949e",
+  track: "#30363d",
+};
+
+const REPOSITORY_FIELDS = `
+  nameWithOwner
+  isFork
+  languages(first: 10, orderBy: { field: SIZE, direction: DESC }) {
+    edges { size node { name color } }
+  }`;
+
+const ACCOUNT_QUERY = `
+query ($login: String!) {
+  user(login: $login) {
+    name
+    repositories(first: 100, ownerAffiliations: OWNER) { nodes { ${REPOSITORY_FIELDS} } }
+    repositoriesContributedTo(first: 100, includeUserRepositories: true, contributionTypes: [COMMIT, PULL_REQUEST]) {
+      nodes { ${REPOSITORY_FIELDS} }
+    }
+  }
+}`;
+
+const PULL_REQUEST_REPOSITORIES_QUERY = `
+query ($query: String!, $cursor: String) {
+  search(type: ISSUE, query: $query, first: 100, after: $cursor) {
+    pageInfo { hasNextPage endCursor }
+    nodes { ... on PullRequest { repository { ${REPOSITORY_FIELDS} } } }
+  }
+}`;
+
+const ISSUE_COUNT_QUERY = `query ($query: String!) { search(type: ISSUE, query: $query, first: 0) { issueCount } }`;
+
+async function queryGitHub(query, variables) {
+  const response = await fetch("https://api.github.com/graphql", {
+    method: "POST",
+    headers: { Authorization: `bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ query, variables }),
+  });
+  const payload = await response.json();
+  if (!response.ok || payload.errors) {
+    throw new Error(`GitHub GraphQL failed: ${JSON.stringify(payload.errors ?? payload)}`);
+  }
+  return payload.data;
+}
+
+async function commitCount(qualifiers) {
+  await wait(SEARCH_INTERVAL_MS);
+  const query = encodeURIComponent(`author:${login} ${qualifiers}`.trim());
+  const response = await fetch(`https://api.github.com/search/commits?q=${query}&per_page=1`, {
+    headers: { Authorization: `bearer ${token}`, Accept: "application/vnd.github+json" },
+  });
+  const payload = await response.json();
+  if (!response.ok) {
+    throw new Error(`GitHub commit search failed: ${JSON.stringify(payload)}`);
+  }
+  return payload.total_count;
+}
+
+async function pullRequestCount(qualifiers) {
+  const data = await queryGitHub(ISSUE_COUNT_QUERY, { query: `is:pr ${qualifiers}` });
+  return data.search.issueCount;
+}
+
+async function pullRequestRepositories() {
+  const repositories = [];
+  let cursor = null;
+  do {
+    const data = await queryGitHub(PULL_REQUEST_REPOSITORIES_QUERY, { query: `is:pr author:${login}`, cursor });
+    repositories.push(...data.search.nodes.map((node) => node.repository));
+    cursor = data.search.pageInfo.hasNextPage ? data.search.pageInfo.endCursor : null;
+  } while (cursor);
+  return repositories;
+}
+
+function distinctRepositories(repositories) {
+  const byName = new Map(repositories.filter((repository) => !repository.isFork).map((repository) => [repository.nameWithOwner, repository]));
+  return [...byName.values()];
+}
+
+async function repositoriesWithCommits(repositories) {
+  const contributed = [];
+  for (const repository of repositories) {
+    const commits = await commitCount(`repo:${repository.nameWithOwner}`);
+    if (commits > 0) contributed.push({ repository, commits });
+  }
+  return contributed;
+}
+
+function languageWeights(contributions) {
+  const weights = new Map();
+  for (const contribution of contributions) {
+    addRepositoryLanguages(weights, contribution);
+  }
+  return weights;
+}
+
+function addRepositoryLanguages(weights, { repository, commits }) {
+  const edges = repository.languages.edges;
+  const repositorySize = edges.reduce((total, edge) => total + edge.size, 0);
+  if (repositorySize === 0) return;
+  for (const edge of edges) {
+    const current = weights.get(edge.node.name) ?? { color: edge.node.color ?? palette.muted, weight: 0 };
+    current.weight += (edge.size / repositorySize) * commits;
+    weights.set(edge.node.name, current);
+  }
+}
+
+function topLanguages(weights, limit) {
+  const total = [...weights.values()].reduce((sum, language) => sum + language.weight, 0);
+  return [...weights.entries()]
+    .map(([name, language]) => ({ name, color: language.color, share: language.weight / total }))
+    .sort((left, right) => right.share - left.share)
+    .slice(0, limit);
+}
+
+function oneYearAgo(now) {
+  const date = new Date(now);
+  date.setUTCFullYear(date.getUTCFullYear() - 1);
+  return date.toISOString().slice(0, 10);
+}
+
+function escapeXml(text) {
+  return String(text).replace(/[<>&"']/g, (character) => `&#${character.charCodeAt(0)};`);
+}
+
+function formatNumber(value) {
+  return new Intl.NumberFormat("pt-BR").format(value);
+}
+
+function cardFrame(title, subtitle, height, body) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="495" height="${height}" viewBox="0 0 495 ${height}" role="img" aria-label="${escapeXml(title)}">
+  <style>
+    .title { font: 600 18px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.title}; }
+    .subtitle { font: 400 11px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.muted}; }
+    .label { font: 600 14px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.text}; }
+    .value { font: 700 14px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.title}; }
+    .language { font: 400 12px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.text}; }
+  </style>
+  <rect width="495" height="${height}" rx="12" fill="${palette.background}"/>
+  <text x="25" y="35" class="title">${escapeXml(title)}</text>
+  <text x="25" y="53" class="subtitle">${escapeXml(subtitle)}</text>
+  ${body}
+</svg>`;
+}
+
+function statsCard(name, rows, generatedAt) {
+  const body = rows
+    .map((row, index) => {
+      const y = 85 + index * 25;
+      return `<circle cx="32" cy="${y - 5}" r="4" fill="${palette.icon}"/>
+  <text x="45" y="${y}" class="label">${escapeXml(row.label)}</text>
+  <text x="470" y="${y}" class="value" text-anchor="end">${escapeXml(formatNumber(row.value))}</text>`;
+    })
+    .join("\n  ");
+  return cardFrame(`${name} · GitHub Stats`, `Inclui repositórios privados e da V4 Company · atualizado em ${generatedAt}`, 85 + rows.length * 25, body);
+}
+
+function languagesCard(languages) {
+  const legend = languages.map((language, index) => languageLegend(language, index)).join("\n  ");
+  const rows = Math.ceil(languages.length / 2);
+  return cardFrame("Linguagens mais usadas", "Ponderado pelos seus commits em cada repositório", 110 + rows * 24, `${progressBar(languages)}\n  ${legend}`);
+}
+
+function progressBar(languages) {
+  let offset = 25;
+  const segments = languages.map((language) => {
+    const width = Math.max(language.share * 445, 1);
+    const segment = `<rect x="${offset.toFixed(2)}" y="70" width="${width.toFixed(2)}" height="8" fill="${language.color}"/>`;
+    offset += width;
+    return segment;
+  });
+  return `<clipPath id="bar"><rect x="25" y="70" width="445" height="8" rx="4"/></clipPath>
+  <rect x="25" y="70" width="445" height="8" rx="4" fill="${palette.track}"/>
+  <g clip-path="url(#bar)">${segments.join("")}</g>`;
+}
+
+function languageLegend(language, index) {
+  const x = 25 + (index % 2) * 230;
+  const y = 105 + Math.floor(index / 2) * 24;
+  const percent = (language.share * 100).toFixed(2);
+  return `<circle cx="${x + 5}" cy="${y - 4}" r="5" fill="${language.color}"/>
+  <text x="${x + 16}" y="${y}" class="language">${escapeXml(language.name)} ${percent}%</text>`;
+}
+
+async function main() {
+  if (!token || !login || !organization) {
+    throw new Error("STATS_TOKEN, STATS_LOGIN and STATS_ORGANIZATION must be set");
+  }
+  const now = new Date();
+  const { user } = await queryGitHub(ACCOUNT_QUERY, { login });
+  const repositories = distinctRepositories([
+    ...user.repositories.nodes,
+    ...user.repositoriesContributedTo.nodes,
+    ...(await pullRequestRepositories()),
+  ]);
+  const contributions = await repositoriesWithCommits(repositories);
+  const rows = [
+    { label: "Commits (total)", value: await commitCount("") },
+    { label: "Commits nos últimos 12 meses", value: await commitCount(`committer-date:>${oneYearAgo(now)}`) },
+    { label: "Commits na V4 Company", value: await commitCount(`org:${organization}`) },
+    { label: "Pull requests", value: await pullRequestCount(`author:${login}`) },
+    { label: "Code reviews", value: await pullRequestCount(`reviewed-by:${login} -author:${login}`) },
+    { label: "Repositórios com contribuição", value: contributions.length },
+  ];
+  const generatedAt = now.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+  await mkdir(outputDirectory, { recursive: true });
+  await writeFile(`${outputDirectory}/stats.svg`, statsCard(user.name ?? login, rows, generatedAt));
+  await writeFile(`${outputDirectory}/languages.svg`, languagesCard(topLanguages(languageWeights(contributions), 8)));
+}
+
+await main();
