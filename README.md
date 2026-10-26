@@ -1,7 +1,9 @@
 <img width="100%" src="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/refs/heads/stats/header.svg" alt="Uma câmera lê a placa LUI1G13 e devolve luigimenezes13" />
 
 Trabalho com backend na V4 Company, no time de Finance: cobrança, faturamento e folha.
-Estudo Engenharia da Computação na PUC-Campinas. Meu TCC lê placas de carro com um Raspberry Pi, e o topo desta página é ele lendo o meu nome.
+Estudo Engenharia da Computação na PUC-Campinas. Meu TCC é um estudo de Engenharia de 
+Software  com um artefato que lê placas de carro com um Raspberry Pi e mostra uma solução 
+sustentável para um problema complexo, o topo desta página é ele lendo o meu nome.
 
 No trabalho escrevo TypeScript. Nas horas livres, Go.
 
