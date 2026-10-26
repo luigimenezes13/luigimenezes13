@@ -56,13 +56,17 @@ query ($query: String!, $cursor: String) {
 
 const ISSUE_COUNT_QUERY = `query ($query: String!) { search(type: ISSUE, query: $query, first: 0) { issueCount } }`;
 
-function isRateLimited(response) {
-  return response.status === 429 || (response.status === 403 && response.headers.get("x-ratelimit-remaining") === "0") || response.headers.has("retry-after");
+const SECONDARY_RATE_LIMIT_DELAY_MS = 90000;
+
+function isRateLimited(response, body) {
+  if (response.status === 429 || response.headers.has("retry-after")) return true;
+  return response.status === 403 && (response.headers.get("x-ratelimit-remaining") === "0" || body.includes("secondary rate limit"));
 }
 
 function rateLimitDelay(response) {
   const retryAfter = Number(response.headers.get("retry-after"));
   if (retryAfter > 0) return retryAfter * 1000;
+  if (response.headers.get("x-ratelimit-remaining") !== "0") return SECONDARY_RATE_LIMIT_DELAY_MS;
   const reset = Number(response.headers.get("x-ratelimit-reset")) * 1000;
   return Math.max(reset - Date.now(), 0) + 1000;
 }
@@ -71,11 +75,12 @@ async function requestJson(url, options, attempt = 1) {
   const response = await fetch(url, options);
   const body = await response.text();
   if (response.ok) return JSON.parse(body);
-  const retryable = isRateLimited(response) || response.status >= 500;
+  const rateLimited = isRateLimited(response, body);
+  const retryable = rateLimited || response.status >= 500;
   if (attempt >= MAX_ATTEMPTS || !retryable) {
     throw new Error(`GitHub request failed (${response.status}): ${body.slice(0, 300)}`);
   }
-  await wait(isRateLimited(response) ? rateLimitDelay(response) : RETRY_DELAY_MS * attempt);
+  await wait(rateLimited ? rateLimitDelay(response) : RETRY_DELAY_MS * attempt);
   return requestJson(url, options, attempt + 1);
 }
 
