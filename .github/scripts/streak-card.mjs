@@ -1,3 +1,4 @@
+import { MONO, SANS } from "./fonts.mjs";
 import { formatNumber, renderCard } from "./card-frame.mjs";
 
 const COLUMNS = [82, 247, 412];
@@ -50,9 +51,9 @@ export function renderStreakCard({ days, dailyCounts, palette }) {
     subtitle: "Dias seguidos com pelo menos um commit · último ano",
     palette,
     styles: `
-    .number { font: 700 28px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.text}; }
-    .hero { font: 800 30px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.title}; }
-    .label { font: 600 13px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.text}; }
+    .number { font: 700 28px ${SANS}; fill: ${palette.text}; }
+    .hero { font: 800 30px ${SANS}; fill: ${palette.title}; }
+    .label { font: 600 13px ${SANS}; fill: ${palette.text}; }
     .ring { fill: none; stroke: ${palette.title}; stroke-width: 5; }`,
     body: `<line x1="165" y1="85" x2="165" y2="200" stroke="${palette.track}"/>
   <line x1="330" y1="85" x2="330" y2="200" stroke="${palette.track}"/>

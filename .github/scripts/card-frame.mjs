@@ -1,3 +1,4 @@
+import { FONT_FACES, MONO, SANS } from "./fonts.mjs";
 export const CARD_WIDTH = 495;
 export const CARD_HEIGHT = 235;
 
@@ -12,10 +13,11 @@ export function formatNumber(value) {
 export function renderCard({ title, subtitle, palette, styles = "", body, height = CARD_HEIGHT }) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${CARD_WIDTH}" height="${height}" viewBox="0 0 ${CARD_WIDTH} ${height}" role="img" aria-label="${escapeXml(title)}">
   <style>
-    .title { font: 600 18px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.title}; }
-    .subtitle { font: 400 11px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.muted}; }
-    .text { font: 400 12px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.text}; }
-    .axis { font: 400 10px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.muted}; }
+    ${FONT_FACES}
+    .title { font: 600 18px ${SANS}; fill: ${palette.heading}; }
+    .subtitle { font: 400 11px ${SANS}; fill: ${palette.muted}; }
+    .text { font: 400 12px ${SANS}; fill: ${palette.text}; }
+    .axis { font: 400 9px ${MONO}; fill: ${palette.muted}; }
     .stagger { opacity: 0; animation: fadeIn 0.4s ease-in-out forwards; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     ${styles}

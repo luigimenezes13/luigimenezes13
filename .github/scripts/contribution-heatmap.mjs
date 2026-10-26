@@ -1,3 +1,4 @@
+import { FONT_FACES, MONO, SANS } from "./fonts.mjs";
 const CELL = 12;
 const GAP = 3;
 const STEP = CELL + GAP;
@@ -71,9 +72,10 @@ export function renderContributionHeatmap({ dailyCounts, today, total, palette, 
   const cells = days.map((day, index) => cell(day, index, counts[index], levelOf(counts[index], thresholds), colors)).join("");
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}" role="img" aria-label="Contribuições no último ano">
   <style>
-    .title { font: 600 18px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.title}; }
-    .subtitle { font: 400 11px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.muted}; }
-    .axis { font: 400 10px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.muted}; }
+    ${FONT_FACES}
+    .title { font: 600 18px ${SANS}; fill: ${palette.heading}; }
+    .subtitle { font: 400 11px ${SANS}; fill: ${palette.muted}; }
+    .axis { font: 400 9px ${MONO}; fill: ${palette.muted}; }
     .day { opacity: 0; animation: reveal 0.4s ease-out forwards; }
     @keyframes reveal { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
   </style>

@@ -1,3 +1,4 @@
+import { MONO, SANS } from "./fonts.mjs";
 import { escapeXml, formatNumber, renderCard } from "./card-frame.mjs";
 
 const HEIGHT = 190;
@@ -61,7 +62,7 @@ function chips(tags, palette) {
   let x = 25;
   return tags
     .map((tag) => {
-      const width = tag.length * 6.4 + 16;
+      const width = tag.length * 7.2 + 18;
       const chip = `<rect x="${x}" y="122" width="${width.toFixed(1)}" height="20" rx="10" fill="none" stroke="${palette.title}" stroke-opacity="0.45"/>
   <text x="${(x + width / 2).toFixed(1)}" y="136" class="chip" text-anchor="middle">${escapeXml(tag)}</text>`;
       x += width + 8;
@@ -98,10 +99,10 @@ export function renderProjectCard({ project, now, palette }) {
     palette,
     height: HEIGHT,
     styles: `
-    .description { font: 400 13px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.text}; }
-    .chip { font: 600 11px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.title}; }
-    .meta { font: 400 12px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.muted}; }
-    .live { font: 700 10px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.title}; }
+    .description { font: 400 13px ${SANS}; fill: ${palette.text}; }
+    .chip { font: 600 10px ${MONO}; fill: ${palette.title}; }
+    .meta { font: 400 10.5px ${MONO}; fill: ${palette.muted}; }
+    .live { font: 700 9px ${MONO}; fill: ${palette.title}; }
     .pulse { animation: pulse 1.6s ease-in-out infinite; }
     .bar { transform-box: fill-box; transform-origin: bottom; transform: scaleY(0); animation: grow 0.4s ease-out forwards; }
     @keyframes grow { to { transform: scaleY(1); } }

@@ -1,3 +1,4 @@
+import { FONT_FACES, MONO, SANS } from "./fonts.mjs";
 const WIDTH = 495;
 const HEIGHT = 235;
 const ROW_HEIGHT = 25;
@@ -71,14 +72,15 @@ export function renderStatsCard({ title, subtitle, items, rank, palette }) {
   const finalOffset = (RING_CIRCUMFERENCE * (rank.percentile / 100)).toFixed(2);
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}" role="img" aria-label="${escapeXml(title)}">
   <style>
-    .title { font: 600 18px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.title}; animation: fadeIn 0.8s ease-in-out forwards; }
-    .subtitle { font: 400 11px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.muted}; }
-    .stat { font: 600 14px 'Segoe UI', Ubuntu, 'Helvetica Neue', sans-serif; fill: ${palette.text}; }
-    .value { fill: ${palette.title}; }
+    ${FONT_FACES}
+    .title { font: 600 18px ${SANS}; fill: ${palette.heading}; animation: fadeIn 0.8s ease-in-out forwards; }
+    .subtitle { font: 400 11px ${SANS}; fill: ${palette.muted}; }
+    .stat { font: 600 14px ${SANS}; fill: ${palette.text}; }
+    .value { font-family: ${MONO}; font-size: 13px; fill: ${palette.title}; }
     .icon { fill: ${palette.icon}; }
     .stagger { opacity: 0; animation: fadeIn 0.3s ease-in-out forwards; }
-    .rank-text { transform-box: fill-box; transform-origin: center; font: 800 26px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.text}; animation: scaleIn 0.3s ease-in-out forwards; }
-    .rank-caption { font: 600 11px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.muted}; }
+    .rank-text { transform-box: fill-box; transform-origin: center; font: 800 26px ${SANS}; fill: ${palette.text}; animation: scaleIn 0.3s ease-in-out forwards; }
+    .rank-caption { font: 600 11px ${MONO}; fill: ${palette.muted}; }
     .rank-circle-rim { stroke: ${palette.icon}; fill: none; stroke-width: 6; opacity: 0.2; }
     .rank-circle { stroke: ${palette.icon}; fill: none; stroke-width: 6; stroke-linecap: round; opacity: 0.85;
       stroke-dasharray: ${RING_CIRCUMFERENCE.toFixed(2)}; stroke-dashoffset: ${finalOffset};

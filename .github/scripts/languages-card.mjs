@@ -1,3 +1,4 @@
+import { MONO, SANS } from "./fonts.mjs";
 import { escapeXml, renderCard } from "./card-frame.mjs";
 
 const CENTER_X = 115;
@@ -34,8 +35,8 @@ export function renderLanguagesCard({ languages, palette }) {
     palette,
     styles: `
     .segment { fill: none; stroke-width: 22; transform: rotate(-90deg); transform-origin: ${CENTER_X}px ${CENTER_Y}px; opacity: 0; animation: fadeIn 0.5s ease-out forwards; }
-    .percent { fill: ${palette.muted}; }
-    .leader { font: 800 20px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.text}; }`,
+    .percent { font-family: ${MONO}; font-size: 11px; fill: ${palette.muted}; }
+    .leader { font: 800 20px ${SANS}; fill: ${palette.text}; }`,
     body: `<circle cx="${CENTER_X}" cy="${CENTER_Y}" r="${RADIUS}" fill="none" stroke="${palette.track}" stroke-width="22"/>
   ${donutSegments(languages)}
   <text x="${CENTER_X}" y="${CENTER_Y + 2}" class="leader" text-anchor="middle">${Math.round(leader.share * 100)}%</text>

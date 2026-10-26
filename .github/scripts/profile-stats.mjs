@@ -4,6 +4,7 @@ import { calendarDays, calendarStart, renderContributionHeatmap } from "./contri
 import { renderLanguagesCard } from "./languages-card.mjs";
 import { renderProductiveTimeCard } from "./productive-time-card.mjs";
 import { renderStreakCard } from "./streak-card.mjs";
+import { renderHeader } from "./header-card.mjs";
 import { ACTIVITY_MONTHS, monthlyCommits, renderProjectCard } from "./project-card.mjs";
 import { ICONS, rankOf, renderStatsCard } from "./stats-card.mjs";
 
@@ -22,6 +23,11 @@ const palette = {
   text: "#c9d1d9",
   muted: "#8b949e",
   track: "#30363d",
+  heading: "#e6edf3",
+  frame: "#0a0c10",
+  signal: "#ff4d5a",
+  hairline: "#3a414b",
+  plateInk: "#17191e",
   empty: "#21262d",
   levels: ["#4c0d12", "#8b1a24", "#d7263d", "#ff6b6b"],
 };
@@ -264,11 +270,17 @@ async function writeProjectCards(now) {
   }
 }
 
+function captureTimestamp(now) {
+  return now.toLocaleString("pt-BR", { timeZone: TIME_ZONE, dateStyle: "short", timeStyle: "medium" }).replace(",", "");
+}
+
 async function main() {
   if (!token || !login || !organization) {
     throw new Error("STATS_TOKEN, STATS_LOGIN and STATS_ORGANIZATION must be set");
   }
   const now = new Date();
+  await mkdir(outputDirectory, { recursive: true });
+  await writeFile(`${outputDirectory}/header.svg`, renderHeader({ capturedAt: captureTimestamp(now), palette }));
   await writeProjectCards(now);
   if (process.env.STATS_ONLY_PROJECTS === "true") return;
   const { user } = await queryGitHub(ACCOUNT_QUERY, { login });
