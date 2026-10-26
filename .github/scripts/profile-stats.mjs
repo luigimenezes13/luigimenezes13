@@ -6,6 +6,8 @@ const login = process.env.STATS_LOGIN;
 const organization = process.env.STATS_ORGANIZATION;
 const outputDirectory = process.env.STATS_OUTPUT ?? "dist";
 const SEARCH_INTERVAL_MS = 2200;
+const MAX_ATTEMPTS = 4;
+const RETRY_DELAY_MS = 5000;
 
 const palette = {
   background: "#161b22",
@@ -36,7 +38,7 @@ query ($login: String!) {
 
 const PULL_REQUEST_REPOSITORIES_QUERY = `
 query ($query: String!, $cursor: String) {
-  search(type: ISSUE, query: $query, first: 100, after: $cursor) {
+  search(type: ISSUE, query: $query, first: 50, after: $cursor) {
     pageInfo { hasNextPage endCursor }
     nodes { ... on PullRequest { repository { ${REPOSITORY_FIELDS} } } }
   }
@@ -44,15 +46,25 @@ query ($query: String!, $cursor: String) {
 
 const ISSUE_COUNT_QUERY = `query ($query: String!) { search(type: ISSUE, query: $query, first: 0) { issueCount } }`;
 
+async function requestJson(url, options, attempt = 1) {
+  const response = await fetch(url, options);
+  const body = await response.text();
+  if (response.ok) return JSON.parse(body);
+  if (attempt >= MAX_ATTEMPTS || response.status < 500) {
+    throw new Error(`GitHub request failed (${response.status}): ${body.slice(0, 300)}`);
+  }
+  await wait(RETRY_DELAY_MS * attempt);
+  return requestJson(url, options, attempt + 1);
+}
+
 async function queryGitHub(query, variables) {
-  const response = await fetch("https://api.github.com/graphql", {
+  const payload = await requestJson("https://api.github.com/graphql", {
     method: "POST",
     headers: { Authorization: `bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify({ query, variables }),
   });
-  const payload = await response.json();
-  if (!response.ok || payload.errors) {
-    throw new Error(`GitHub GraphQL failed: ${JSON.stringify(payload.errors ?? payload)}`);
+  if (payload.errors) {
+    throw new Error(`GitHub GraphQL failed: ${JSON.stringify(payload.errors)}`);
   }
   return payload.data;
 }
@@ -60,13 +72,9 @@ async function queryGitHub(query, variables) {
 async function commitCount(qualifiers) {
   await wait(SEARCH_INTERVAL_MS);
   const query = encodeURIComponent(`author:${login} ${qualifiers}`.trim());
-  const response = await fetch(`https://api.github.com/search/commits?q=${query}&per_page=1`, {
+  const payload = await requestJson(`https://api.github.com/search/commits?q=${query}&per_page=1`, {
     headers: { Authorization: `bearer ${token}`, Accept: "application/vnd.github+json" },
   });
-  const payload = await response.json();
-  if (!response.ok) {
-    throw new Error(`GitHub commit search failed: ${JSON.stringify(payload)}`);
-  }
   return payload.total_count;
 }
 
