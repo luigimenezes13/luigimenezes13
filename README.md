@@ -1,17 +1,17 @@
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&height=220&color=0:7aa2f7,50:bb9af7,100:f7768e&text=Luigi%20Menezes&fontColor=ffffff&fontSize=60&fontAlignY=38&desc=Software%20Engineer%20%E2%80%A2%20V4%20Company&descAlignY=58&descSize=18&animation=fadeIn" width="100%" alt="Luigi Menezes" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&height=220&color=0:7f0d1a,50:d7263d,100:ff6b6b&text=Luigi%20Menezes&fontColor=ffffff&fontSize=60&fontAlignY=38&desc=Software%20Engineer%20%E2%80%A2%20V4%20Company&descAlignY=58&descSize=18&animation=fadeIn" width="100%" alt="Luigi Menezes" />
 </p>
 
 <p align="center">
   <a href="https://github.com/luigimenezes13">
-    <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=600&size=22&duration=3000&pause=800&color=BB9AF7&center=true&vCenter=true&width=620&lines=Backend+com+TypeScript+e+Go;Domain-Driven+Design+%2B+Clean+Architecture;Construindo+o+financeiro+da+V4+Company;Eng.+da+Computa%C3%A7%C3%A3o+%40+PUC-Campinas" alt="Typing SVG" />
+    <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=600&size=22&duration=3000&pause=800&color=FF4D5A&center=true&vCenter=true&width=620&lines=Backend+com+TypeScript+e+Go;Domain-Driven+Design+%2B+Clean+Architecture;Construindo+o+financeiro+da+V4+Company;Eng.+da+Computa%C3%A7%C3%A3o+%40+PUC-Campinas" alt="Typing SVG" />
   </a>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Campinas%2C%20SP-1a1b27?style=for-the-badge&logo=googlemaps&logoColor=f7768e" />
-  <img src="https://img.shields.io/badge/V4%20Company-1a1b27?style=for-the-badge&logo=rocket&logoColor=7aa2f7" />
-  <img src="https://img.shields.io/badge/PUC--Campinas-1a1b27?style=for-the-badge&logo=bookstack&logoColor=bb9af7" />
+  <img src="https://img.shields.io/badge/Campinas%2C%20SP-1a1b27?style=for-the-badge&logo=googlemaps&logoColor=ff6b6b" />
+  <img src="https://img.shields.io/badge/V4%20Company-1a1b27?style=for-the-badge&logo=rocket&logoColor=ff4d5a" />
+  <img src="https://img.shields.io/badge/PUC--Campinas-1a1b27?style=for-the-badge&logo=bookstack&logoColor=d7263d" />
 </p>
 
 ---
@@ -73,8 +73,8 @@ const luigi = {
 ### 📊 GitHub em números
 
 <p align="center">
-  <img height="170" src="https://github-readme-stats.vercel.app/api?username=luigimenezes13&show_icons=true&include_all_commits=true&count_private=true&theme=tokyonight&hide_border=true&border_radius=12" />
-  <img height="170" src="https://github-readme-stats.vercel.app/api/top-langs/?username=luigimenezes13&layout=compact&langs_count=8&theme=tokyonight&hide_border=true&border_radius=12" />
+  <img height="170" src="https://github-readme-stats.vercel.app/api?username=luigimenezes13&show_icons=true&include_all_commits=true&count_private=true&bg_color=161b22&title_color=ff4d5a&icon_color=ff4d5a&text_color=c9d1d9&ring_color=ff4d5a&hide_border=true&border_radius=12" />
+  <img height="170" src="https://github-readme-stats.vercel.app/api/top-langs/?username=luigimenezes13&layout=compact&langs_count=8&bg_color=161b22&title_color=ff4d5a&icon_color=ff4d5a&text_color=c9d1d9&ring_color=ff4d5a&hide_border=true&border_radius=12" />
 </p>
 
 ### 🐍 Contribuições
@@ -87,4 +87,4 @@ const luigi = {
   </picture>
 </p>
 
-<img src="https://capsule-render.vercel.app/api?type=waving&height=120&color=0:7aa2f7,50:bb9af7,100:f7768e&section=footer" width="100%" />
+<img src="https://capsule-render.vercel.app/api?type=waving&height=120&color=0:7f0d1a,50:d7263d,100:ff6b6b&section=footer" width="100%" />
