@@ -12,7 +12,6 @@
   <img src="https://img.shields.io/badge/Campinas%2C%20SP-1a1b27?style=for-the-badge&logo=googlemaps&logoColor=f7768e" />
   <img src="https://img.shields.io/badge/V4%20Company-1a1b27?style=for-the-badge&logo=rocket&logoColor=7aa2f7" />
   <img src="https://img.shields.io/badge/PUC--Campinas-1a1b27?style=for-the-badge&logo=bookstack&logoColor=bb9af7" />
-  <img src="https://komarev.com/ghpvc/?username=luigimenezes13&style=for-the-badge&color=7aa2f7&label=VISITAS" />
 </p>
 
 ---
