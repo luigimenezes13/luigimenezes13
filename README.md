@@ -73,8 +73,8 @@ const luigi = {
 ### 📊 GitHub em números
 
 <p align="center">
-  <img height="170" src="https://github-readme-stats.vercel.app/api?username=luigimenezes13&show_icons=true&include_all_commits=true&count_private=true&bg_color=161b22&title_color=ff4d5a&icon_color=ff4d5a&text_color=c9d1d9&ring_color=ff4d5a&hide_border=true&border_radius=12" />
-  <img height="170" src="https://github-readme-stats.vercel.app/api/top-langs/?username=luigimenezes13&layout=compact&langs_count=8&bg_color=161b22&title_color=ff4d5a&icon_color=ff4d5a&text_color=c9d1d9&ring_color=ff4d5a&hide_border=true&border_radius=12" />
+  <img height="190" src="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/refs/heads/stats/stats.svg" alt="GitHub stats" />
+  <img height="190" src="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/refs/heads/stats/languages.svg" alt="Linguagens mais usadas" />
 </p>
 
 ### 🐍 Contribuições
