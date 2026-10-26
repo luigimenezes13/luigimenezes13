@@ -6,8 +6,8 @@ const token = process.env.STATS_TOKEN;
 const login = process.env.STATS_LOGIN;
 const organization = process.env.STATS_ORGANIZATION;
 const outputDirectory = process.env.STATS_OUTPUT ?? "dist";
-const SEARCH_INTERVAL_MS = 2200;
-const MAX_ATTEMPTS = 4;
+const SEARCH_INTERVAL_MS = 2500;
+const MAX_ATTEMPTS = 6;
 const RETRY_DELAY_MS = 5000;
 const CARD_HEIGHT = 235;
 
@@ -52,14 +52,26 @@ query ($query: String!, $cursor: String) {
 
 const ISSUE_COUNT_QUERY = `query ($query: String!) { search(type: ISSUE, query: $query, first: 0) { issueCount } }`;
 
+function isRateLimited(response) {
+  return response.status === 429 || (response.status === 403 && response.headers.get("x-ratelimit-remaining") === "0") || response.headers.has("retry-after");
+}
+
+function rateLimitDelay(response) {
+  const retryAfter = Number(response.headers.get("retry-after"));
+  if (retryAfter > 0) return retryAfter * 1000;
+  const reset = Number(response.headers.get("x-ratelimit-reset")) * 1000;
+  return Math.max(reset - Date.now(), 0) + 1000;
+}
+
 async function requestJson(url, options, attempt = 1) {
   const response = await fetch(url, options);
   const body = await response.text();
   if (response.ok) return JSON.parse(body);
-  if (attempt >= MAX_ATTEMPTS || response.status < 500) {
+  const retryable = isRateLimited(response) || response.status >= 500;
+  if (attempt >= MAX_ATTEMPTS || !retryable) {
     throw new Error(`GitHub request failed (${response.status}): ${body.slice(0, 300)}`);
   }
-  await wait(RETRY_DELAY_MS * attempt);
+  await wait(isRateLimited(response) ? rateLimitDelay(response) : RETRY_DELAY_MS * attempt);
   return requestJson(url, options, attempt + 1);
 }
 
