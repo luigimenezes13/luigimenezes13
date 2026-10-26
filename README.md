@@ -77,6 +77,11 @@ const luigi = {
   <img width="49%" src="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/refs/heads/stats/languages.svg" alt="Linguagens mais usadas" />
 </p>
 
+<p align="center">
+  <img width="49%" src="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/refs/heads/stats/streak.svg" alt="Sequência de commits" />
+  <img width="49%" src="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/refs/heads/stats/productive-time.svg" alt="Horário mais produtivo" />
+</p>
+
 ### 🔥 Contribuições
 
 <p align="center">

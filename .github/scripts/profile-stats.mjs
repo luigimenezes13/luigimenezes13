@@ -1,6 +1,9 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { setTimeout as wait } from "node:timers/promises";
-import { calendarStart, renderContributionHeatmap } from "./contribution-heatmap.mjs";
+import { calendarDays, calendarStart, renderContributionHeatmap } from "./contribution-heatmap.mjs";
+import { renderLanguagesCard } from "./languages-card.mjs";
+import { renderProductiveTimeCard } from "./productive-time-card.mjs";
+import { renderStreakCard } from "./streak-card.mjs";
 import { ICONS, rankOf, renderStatsCard } from "./stats-card.mjs";
 
 const token = process.env.STATS_TOKEN;
@@ -10,7 +13,6 @@ const outputDirectory = process.env.STATS_OUTPUT ?? "dist";
 const SEARCH_INTERVAL_MS = 2500;
 const MAX_ATTEMPTS = 6;
 const RETRY_DELAY_MS = 5000;
-const CARD_HEIGHT = 235;
 
 const palette = {
   background: "#161b22",
@@ -118,25 +120,33 @@ function monthlyRanges(firstDay, today) {
   return ranges;
 }
 
-async function commitDatesIn(range) {
+function localHour(date) {
+  return Number(new Date(date).toLocaleString("en-US", { timeZone: TIME_ZONE, hour: "2-digit", hourCycle: "h23" }));
+}
+
+async function commitTimestampsIn(range) {
   const dates = [];
   for (let page = 1; page <= 10; page += 1) {
     const payload = await searchCommits(`author-date:${range}`, page, 100);
-    dates.push(...payload.items.map((item) => localDate(item.commit.author.date)));
+    dates.push(...payload.items.map((item) => item.commit.author.date));
     if (payload.items.length < 100) return dates;
   }
   return dates;
 }
 
-async function dailyCommitCounts(today) {
+async function commitActivity(today) {
   const firstDay = calendarStart(today).toISOString().slice(0, 10);
-  const counts = new Map();
+  const dailyCounts = new Map();
+  const hourlyCounts = Array(24).fill(0);
   for (const range of monthlyRanges(firstDay, today)) {
-    for (const date of await commitDatesIn(range)) {
-      if (date >= firstDay && date <= today) counts.set(date, (counts.get(date) ?? 0) + 1);
+    for (const timestamp of await commitTimestampsIn(range)) {
+      const date = localDate(timestamp);
+      if (date < firstDay || date > today) continue;
+      dailyCounts.set(date, (dailyCounts.get(date) ?? 0) + 1);
+      hourlyCounts[localHour(timestamp)] += 1;
     }
   }
-  return counts;
+  return { dailyCounts, hourlyCounts };
 }
 
 async function pullRequestCount(qualifiers) {
@@ -201,53 +211,6 @@ function topLanguages(weights, limit) {
     .slice(0, limit);
 }
 
-function escapeXml(text) {
-  return String(text).replace(/[<>&"']/g, (character) => `&#${character.charCodeAt(0)};`);
-}
-
-function cardFrame(title, subtitle, body) {
-  const height = CARD_HEIGHT;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="495" height="${height}" viewBox="0 0 495 ${height}" role="img" aria-label="${escapeXml(title)}">
-  <style>
-    .title { font: 600 18px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.title}; }
-    .subtitle { font: 400 11px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.muted}; }
-    .label { font: 600 14px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.text}; }
-    .value { font: 700 14px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.title}; }
-    .language { font: 400 12px 'Segoe UI', Ubuntu, sans-serif; fill: ${palette.text}; }
-  </style>
-  <rect width="495" height="${height}" rx="12" fill="${palette.background}"/>
-  <text x="25" y="35" class="title">${escapeXml(title)}</text>
-  <text x="25" y="53" class="subtitle">${escapeXml(subtitle)}</text>
-  ${body}
-</svg>`;
-}
-
-function languagesCard(languages) {
-  const legend = languages.map((language, index) => languageLegend(language, index)).join("\n  ");
-  return cardFrame("Linguagens mais usadas", "Ponderado pelos seus commits em cada repositório", `${progressBar(languages)}\n  ${legend}`);
-}
-
-function progressBar(languages) {
-  let offset = 25;
-  const segments = languages.map((language) => {
-    const width = Math.max(language.share * 445, 1);
-    const segment = `<rect x="${offset.toFixed(2)}" y="70" width="${width.toFixed(2)}" height="8" fill="${language.color}"/>`;
-    offset += width;
-    return segment;
-  });
-  return `<clipPath id="bar"><rect x="25" y="70" width="445" height="8" rx="4"/></clipPath>
-  <rect x="25" y="70" width="445" height="8" rx="4" fill="${palette.track}"/>
-  <g clip-path="url(#bar)">${segments.join("")}</g>`;
-}
-
-function languageLegend(language, index) {
-  const x = 25 + (index % 2) * 230;
-  const y = 112 + Math.floor(index / 2) * 32;
-  const percent = (language.share * 100).toFixed(2);
-  return `<circle cx="${x + 5}" cy="${y - 4}" r="5" fill="${language.color}"/>
-  <text x="${x + 16}" y="${y}" class="language">${escapeXml(language.name)} ${percent}%</text>`;
-}
-
 async function main() {
   if (!token || !login || !organization) {
     throw new Error("STATS_TOKEN, STATS_LOGIN and STATS_ORGANIZATION must be set");
@@ -279,7 +242,7 @@ async function main() {
   ];
   const generatedAt = now.toLocaleDateString("pt-BR", { timeZone: TIME_ZONE });
   const today = localDate(now);
-  const dailyCounts = await dailyCommitCounts(today);
+  const { dailyCounts, hourlyCounts } = await commitActivity(today);
   const total = [...dailyCounts.values()].reduce((sum, count) => sum + count, 0);
   await mkdir(outputDirectory, { recursive: true });
   await writeFile(
@@ -296,7 +259,9 @@ async function main() {
     `${outputDirectory}/contributions.svg`,
     renderContributionHeatmap({ dailyCounts, today, total, palette, subtitle: `Inclui repositórios privados e da V4 Company · atualizado em ${generatedAt}` }),
   );
-  await writeFile(`${outputDirectory}/languages.svg`, languagesCard(topLanguages(languageWeights(contributions), 8)));
+  await writeFile(`${outputDirectory}/languages.svg`, renderLanguagesCard({ languages: topLanguages(languageWeights(contributions), 8), palette }));
+  await writeFile(`${outputDirectory}/productive-time.svg`, renderProductiveTimeCard({ hourlyCounts, palette }));
+  await writeFile(`${outputDirectory}/streak.svg`, renderStreakCard({ days: calendarDays(today), dailyCounts, palette }));
 }
 
 await main();

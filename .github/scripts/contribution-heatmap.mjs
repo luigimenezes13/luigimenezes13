@@ -15,7 +15,7 @@ export function calendarStart(today) {
   return start;
 }
 
-function calendarDays(today) {
+export function calendarDays(today) {
   const days = [];
   const cursor = calendarStart(today);
   while (cursor.toISOString().slice(0, 10) <= today) {
