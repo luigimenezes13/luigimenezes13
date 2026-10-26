@@ -18,15 +18,80 @@
 
 ### 👋 Sobre mim
 
+Sou engenheiro de software na **V4 Company**, no time **Finance**, e estudo **Engenharia da Computação na PUC-Campinas**. Moro em Campinas (SP).
+Gosto de código que conta a história do negócio: o domínio no centro, nomes que dispensam comentário e testes que provam as regras.
+No dia a dia construo o backend da plataforma **MARS** da V4: cobrança, faturamento, folha e o ciclo de vida de quem trabalha na rede.
+
 ```ts
 const luigi = {
-  role: "Software Engineer @ V4 Company — time Finance",
+  role: "Software Engineer @ V4 Company",
+  team: "Finance: billing, cobrança, faturamento e workforce",
+  location: "Campinas, SP 🇧🇷",
   education: "Engenharia da Computação @ PUC-Campinas",
-  focus: ["Domain-Driven Design", "Clean Architecture", "SOLID", "Object Calisthenics"],
-  currentlyLearning: ["Go", "Open Finance", "sistemas distribuídos"],
-  workflow: "IA no dia a dia, com teste e revisão antes do merge",
+  thesis: "Monitoramento de estacionamento com LPR: visão computacional + microsserviços",
+  stack: {
+    backend: ["TypeScript", "Node.js", "Fastify", "NestJS", "Go", "Python"],
+    data: ["PostgreSQL", "Prisma", "Kysely", "MongoDB"],
+    messaging: ["RabbitMQ", "eventos de domínio", "DLQ"],
+    infra: ["AWS", "Docker", "Kubernetes (EKS)", "GitHub Actions", "Datadog"],
+  },
+  architecture: [
+    "Domain-Driven Design", "Clean Architecture", "SOLID",
+    "Object Calisthenics", "Event-Driven",
+  ],
+  currentlyBuilding: "Financial Manager: finanças pessoais com Open Finance, em Go",
+  currentlyLearning: ["Go idiomático", "concorrência", "testes table-driven", "pgx"],
+  workflow: [
+    "IA no fluxo: Claude Code + skills próprias de revisão",
+    "teste e code review antes de todo merge",
+  ],
 };
 ```
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+
+#### 💼 Na V4 Company
+- Backend da plataforma **MARS** no time Finance
+- Cobrança, faturamento e integração com gateway de pagamento
+- Workforce: folha, franquias e offboarding
+- Consumidores de eventos idempotentes e reprocessamento seguro de DLQ
+- Trilha de onboarding backend dos trainees (**V4 Mars Astronauts Training**)
+
+</td>
+    <td width="50%" valign="top">
+
+#### 🎓 Na faculdade
+- **TCC**: sistema de monitoramento de vagas com leitura de placas
+- YOLOv8 + PaddleOCR rodando no **Raspberry Pi** (edge)
+- API em Fastify + PostgreSQL + RabbitMQ e painel em React
+- Base de computação: estruturas de dados, SO, álgebra linear, estatística
+
+</td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+
+#### 🧭 Como eu penso código
+- O domínio é a fonte da verdade, e framework fica na borda
+- Value Objects no lugar de primitivos soltos
+- Sem `else`: guard clauses e polimorfismo
+- Todo use case tem teste, e fluxo de dinheiro testa o caso duplicado e o de falha
+- Mudança de banco e de evento sempre compatível com a versão anterior
+
+</td>
+    <td width="50%" valign="top">
+
+#### 🔭 Agora
+- 🏦 Construindo o **Financial Manager** em Go, com 4 bounded contexts
+- 🌱 Aprendendo Go a fundo: testes, concorrência, `net/http` e `pgx`
+- 🤖 Automatizando meu fluxo com agentes e skills de revisão (DDD, Clean Arch, SOLID)
+- 📈 Este perfil se atualiza sozinho toda madrugada, com dados privados inclusos
+
+</td>
+  </tr>
+</table>
 
 ### 🛠️ Stack
 
@@ -36,7 +101,7 @@ const luigi = {
     <br/>
     <img src="https://skillicons.dev/icons?i=nestjs,react,nextjs,prisma,postgres,mongodb&theme=dark" />
     <br/>
-    <img src="https://skillicons.dev/icons?i=docker,aws,githubactions,jenkins,linux,git&theme=dark" />
+    <img src="https://skillicons.dev/icons?i=docker,kubernetes,aws,rabbitmq,githubactions,linux,git&theme=dark" />
   </a>
 </p>
 
