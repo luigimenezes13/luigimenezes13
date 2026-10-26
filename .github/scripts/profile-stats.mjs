@@ -1,5 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { setTimeout as wait } from "node:timers/promises";
+import { calendarStart, renderContributionHeatmap } from "./contribution-heatmap.mjs";
 
 const token = process.env.STATS_TOKEN;
 const login = process.env.STATS_LOGIN;
@@ -17,7 +18,11 @@ const palette = {
   text: "#c9d1d9",
   muted: "#8b949e",
   track: "#30363d",
+  empty: "#21262d",
+  levels: ["#4c0d12", "#8b1a24", "#d7263d", "#ff6b6b"],
 };
+
+const TIME_ZONE = "America/Sao_Paulo";
 
 const REPOSITORY_FIELDS = `
   nameWithOwner
@@ -70,13 +75,54 @@ async function queryGitHub(query, variables) {
   return payload.data;
 }
 
-async function commitCount(qualifiers) {
+async function searchCommits(qualifiers, page = 1, perPage = 1) {
   await wait(SEARCH_INTERVAL_MS);
   const query = encodeURIComponent(`author:${login} ${qualifiers}`.trim());
-  const payload = await requestJson(`https://api.github.com/search/commits?q=${query}&per_page=1`, {
+  return requestJson(`https://api.github.com/search/commits?q=${query}&per_page=${perPage}&page=${page}`, {
     headers: { Authorization: `bearer ${token}`, Accept: "application/vnd.github+json" },
   });
+}
+
+async function commitCount(qualifiers) {
+  const payload = await searchCommits(qualifiers);
   return payload.total_count;
+}
+
+function localDate(date) {
+  return new Date(date).toLocaleDateString("en-CA", { timeZone: TIME_ZONE });
+}
+
+function monthlyRanges(firstDay, today) {
+  const ranges = [];
+  const cursor = new Date(`${firstDay.slice(0, 7)}-01T00:00:00Z`);
+  while (cursor.toISOString().slice(0, 10) <= today) {
+    const start = cursor.toISOString().slice(0, 10);
+    cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+    const end = new Date(cursor.getTime() - 86400000).toISOString().slice(0, 10);
+    ranges.push(`${start}..${end}`);
+  }
+  return ranges;
+}
+
+async function commitDatesIn(range) {
+  const dates = [];
+  for (let page = 1; page <= 10; page += 1) {
+    const payload = await searchCommits(`author-date:${range}`, page, 100);
+    dates.push(...payload.items.map((item) => localDate(item.commit.author.date)));
+    if (payload.items.length < 100) return dates;
+  }
+  return dates;
+}
+
+async function dailyCommitCounts(today) {
+  const firstDay = calendarStart(today).toISOString().slice(0, 10);
+  const counts = new Map();
+  for (const range of monthlyRanges(firstDay, today)) {
+    for (const date of await commitDatesIn(range)) {
+      if (date >= firstDay && date <= today) counts.set(date, (counts.get(date) ?? 0) + 1);
+    }
+  }
+  return counts;
 }
 
 async function pullRequestCount(qualifiers) {
@@ -225,9 +271,16 @@ async function main() {
     { label: "Code reviews", value: await pullRequestCount(`reviewed-by:${login} -author:${login}`) },
     { label: "Repositórios com contribuição", value: contributions.length },
   ];
-  const generatedAt = now.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+  const generatedAt = now.toLocaleDateString("pt-BR", { timeZone: TIME_ZONE });
+  const today = localDate(now);
+  const dailyCounts = await dailyCommitCounts(today);
+  const total = [...dailyCounts.values()].reduce((sum, count) => sum + count, 0);
   await mkdir(outputDirectory, { recursive: true });
   await writeFile(`${outputDirectory}/stats.svg`, statsCard(user.name ?? login, rows, generatedAt));
+  await writeFile(
+    `${outputDirectory}/contributions.svg`,
+    renderContributionHeatmap({ dailyCounts, today, total, palette, subtitle: `Inclui repositórios privados e da V4 Company · atualizado em ${generatedAt}` }),
+  );
   await writeFile(`${outputDirectory}/languages.svg`, languagesCard(topLanguages(languageWeights(contributions), 8)));
 }
 

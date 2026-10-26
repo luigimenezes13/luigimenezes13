@@ -77,14 +77,10 @@ const luigi = {
   <img width="49%" src="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/refs/heads/stats/languages.svg" alt="Linguagens mais usadas" />
 </p>
 
-### 🐍 Contribuições
+### 🔥 Contribuições
 
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/refs/heads/output/github-snake-dark.svg" />
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/refs/heads/output/github-snake.svg" />
-    <img alt="snake" src="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/refs/heads/output/github-snake-dark.svg" />
-  </picture>
+  <img width="100%" src="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/refs/heads/stats/contributions.svg" alt="Contribuições no último ano" />
 </p>
 
 <img src="https://capsule-render.vercel.app/api?type=waving&height=120&color=0:7f0d1a,50:d7263d,100:ff6b6b&section=footer" width="100%" />
