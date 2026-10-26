@@ -77,4 +77,14 @@ const luigi = {
   <img height="170" src="https://github-readme-stats.vercel.app/api/top-langs/?username=luigimenezes13&layout=compact&langs_count=8&theme=tokyonight&hide_border=true&border_radius=12" />
 </p>
 
+### 🐍 Contribuições
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/output/github-snake-dark.svg" />
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/output/github-snake.svg" />
+    <img alt="snake" src="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/output/github-snake-dark.svg" />
+  </picture>
+</p>
+
 <img src="https://capsule-render.vercel.app/api?type=waving&height=120&color=0:7aa2f7,50:bb9af7,100:f7768e&section=footer" width="100%" />
