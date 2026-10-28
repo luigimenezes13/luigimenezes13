@@ -1,9 +1,9 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { setTimeout as wait } from "node:timers/promises";
-import { calendarDays, calendarStart, renderContributionHeatmap } from "./contribution-heatmap.mjs";
+import { calendarStart, renderContributionHeatmap } from "./contribution-heatmap.mjs";
 import { renderLanguagesCard } from "./languages-card.mjs";
+import { renderMergeTimeCard } from "./merge-time-card.mjs";
 import { renderProductiveTimeCard } from "./productive-time-card.mjs";
-import { renderStreakCard } from "./streak-card.mjs";
 import { renderHeader } from "./header-card.mjs";
 import { ACTIVITY_MONTHS, monthlyCommits, renderProjectCard } from "./project-card.mjs";
 import { ICONS, rankOf, renderStatsCard } from "./stats-card.mjs";
@@ -58,6 +58,14 @@ query ($query: String!, $cursor: String) {
   search(type: ISSUE, query: $query, first: 50, after: $cursor) {
     pageInfo { hasNextPage endCursor }
     nodes { ... on PullRequest { repository { ${REPOSITORY_FIELDS} } } }
+  }
+}`;
+
+const MERGED_PULL_REQUESTS_QUERY = `
+query ($query: String!, $cursor: String) {
+  search(type: ISSUE, query: $query, first: 100, after: $cursor) {
+    pageInfo { hasNextPage endCursor }
+    nodes { ... on PullRequest { createdAt mergedAt additions deletions } }
   }
 }`;
 
@@ -200,6 +208,24 @@ async function pullRequestRepositories() {
   return repositories;
 }
 
+async function mergedPullRequests(today) {
+  const pullRequests = [];
+  let cursor = null;
+  do {
+    const data = await queryGitHub(MERGED_PULL_REQUESTS_QUERY, { query: `is:pr is:merged author:${login} merged:>=${calendarStart(today).toISOString().slice(0, 10)}`, cursor });
+    pullRequests.push(...data.search.nodes.map(toMergedPullRequest));
+    cursor = data.search.pageInfo.hasNextPage ? data.search.pageInfo.endCursor : null;
+  } while (cursor);
+  return pullRequests;
+}
+
+function toMergedPullRequest(node) {
+  return {
+    hoursToMerge: (new Date(node.mergedAt) - new Date(node.createdAt)) / 3_600_000,
+    linesChanged: node.additions + node.deletions,
+  };
+}
+
 function distinctRepositories(repositories) {
   const byName = new Map(repositories.filter((repository) => !repository.isFork).map((repository) => [repository.nameWithOwner, repository]));
   return [...byName.values()];
@@ -328,7 +354,7 @@ async function main() {
   );
   await writeFile(`${outputDirectory}/languages.svg`, renderLanguagesCard({ languages: topLanguages(languageWeights(contributions), 8), palette }));
   await writeFile(`${outputDirectory}/productive-time.svg`, renderProductiveTimeCard({ hourlyCounts, palette }));
-  await writeFile(`${outputDirectory}/streak.svg`, renderStreakCard({ days: calendarDays(today), dailyCounts, palette }));
+  await writeFile(`${outputDirectory}/merge-time.svg`, renderMergeTimeCard({ pullRequests: await mergedPullRequests(today), palette }));
 }
 
 await main();

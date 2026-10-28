@@ -34,7 +34,7 @@ No trabalho escrevo TypeScript. Nas horas livres, Go.
 </p>
 
 <p align="center">
-  <img width="49%" src="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/refs/heads/stats/streak.svg" alt="Sequência de commits" />
+  <img width="49%" src="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/refs/heads/stats/merge-time.svg" alt="Tempo do PR ao merge" />
   <img width="49%" src="https://raw.githubusercontent.com/luigimenezes13/luigimenezes13/refs/heads/stats/productive-time.svg" alt="Horário mais produtivo" />
 </p>
 
