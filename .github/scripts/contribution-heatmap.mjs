@@ -1,4 +1,6 @@
 import { FONT_FACES, MONO, SANS } from "./fonts.mjs";
+import { renderSnake } from "./snake.mjs";
+
 const CELL = 12;
 const GAP = 3;
 const STEP = CELL + GAP;
@@ -64,11 +66,26 @@ function legend(colors) {
   return `<text x="${x}" y="${y + 10}" class="axis">menos</text>${swatches}<text x="${x + 46 + colors.length * STEP}" y="${y + 10}" class="axis">mais</text>`;
 }
 
+const GRID = {
+  weeks: WEEKS,
+  cell: CELL,
+  step: STEP,
+  x: (week) => LEFT + week * STEP,
+  y: (weekday) => TOP + weekday * STEP,
+};
+
+function filledCells(counts) {
+  return counts
+    .map((count, index) => ({ count, index, week: Math.floor(index / 7), weekday: index % 7 }))
+    .filter((cell) => cell.count > 0);
+}
+
 export function renderContributionHeatmap({ dailyCounts, today, total, palette, subtitle }) {
   const colors = [palette.empty, ...palette.levels];
   const days = calendarDays(today);
   const counts = days.map((day) => dailyCounts.get(day) ?? 0);
   const thresholds = levelThresholds(counts);
+  const snake = renderSnake({ cells: filledCells(counts), grid: GRID, palette });
   const cells = days.map((day, index) => cell(day, index, counts[index], levelOf(counts[index], thresholds), colors)).join("");
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}" role="img" aria-label="Contribuições no último ano">
   <style>
@@ -78,10 +95,11 @@ export function renderContributionHeatmap({ dailyCounts, today, total, palette, 
     .axis { font: 400 9px ${MONO}; fill: ${palette.muted}; }
     .day { opacity: 0; animation: reveal 0.4s ease-out forwards; }
     @keyframes reveal { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    ${snake.styles}
   </style>
   <rect width="${WIDTH}" height="${HEIGHT}" rx="12" fill="${palette.background}"/>
   <text x="25" y="35" class="title">${new Intl.NumberFormat("pt-BR").format(total)} commits no último ano</text>
   <text x="25" y="53" class="subtitle">${subtitle}</text>
-  ${monthLabels(days)}${weekdayLabels()}${cells}${legend(colors)}
+  ${monthLabels(days)}${weekdayLabels()}${cells}${snake.body}${legend(colors)}
 </svg>`;
 }
