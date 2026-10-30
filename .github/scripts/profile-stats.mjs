@@ -5,6 +5,7 @@ import { renderLanguagesCard } from "./languages-card.mjs";
 import { renderMergeTimeCard } from "./merge-time-card.mjs";
 import { renderProductiveTimeCard } from "./productive-time-card.mjs";
 import { renderHeader } from "./header-card.mjs";
+import { PALETTES } from "./palettes.mjs";
 import { ACTIVITY_MONTHS, monthlyCommits, renderProjectCard } from "./project-card.mjs";
 import { ICONS, rankOf, renderStatsCard } from "./stats-card.mjs";
 
@@ -16,38 +17,6 @@ const SEARCH_INTERVAL_MS = 2500;
 const MAX_ATTEMPTS = 6;
 const RETRY_DELAY_MS = 5000;
 
-const PALETTES = {
-  "": {
-    background: "#161b22",
-    title: "#ff4d5a",
-    icon: "#ff4d5a",
-    text: "#c9d1d9",
-    muted: "#8b949e",
-    track: "#30363d",
-    heading: "#e6edf3",
-    frame: "#0a0c10",
-    signal: "#ff4d5a",
-    hairline: "#3a414b",
-    plateInk: "#17191e",
-    empty: "#21262d",
-    levels: ["#4c0d12", "#8b1a24", "#d7263d", "#ff6b6b"],
-  },
-  "-light": {
-    background: "#f6f8fa",
-    title: "#d7263d",
-    icon: "#d7263d",
-    text: "#24292f",
-    muted: "#59636e",
-    track: "#d1d9e0",
-    heading: "#1f2328",
-    frame: "#eef0f3",
-    signal: "#d7263d",
-    hairline: "#b8c0c9",
-    plateInk: "#17191e",
-    empty: "#e3e7eb",
-    levels: ["#ffc2c8", "#ff7a86", "#e5384c", "#a3101f"],
-  },
-};
 const FALLBACK_LANGUAGE_COLOR = "#8b949e";
 
 const TIME_ZONE = "America/Sao_Paulo";
