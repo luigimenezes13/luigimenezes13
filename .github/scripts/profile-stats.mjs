@@ -16,21 +16,39 @@ const SEARCH_INTERVAL_MS = 2500;
 const MAX_ATTEMPTS = 6;
 const RETRY_DELAY_MS = 5000;
 
-const palette = {
-  background: "#161b22",
-  title: "#ff4d5a",
-  icon: "#ff4d5a",
-  text: "#c9d1d9",
-  muted: "#8b949e",
-  track: "#30363d",
-  heading: "#e6edf3",
-  frame: "#0a0c10",
-  signal: "#ff4d5a",
-  hairline: "#3a414b",
-  plateInk: "#17191e",
-  empty: "#21262d",
-  levels: ["#4c0d12", "#8b1a24", "#d7263d", "#ff6b6b"],
+const PALETTES = {
+  "": {
+    background: "#161b22",
+    title: "#ff4d5a",
+    icon: "#ff4d5a",
+    text: "#c9d1d9",
+    muted: "#8b949e",
+    track: "#30363d",
+    heading: "#e6edf3",
+    frame: "#0a0c10",
+    signal: "#ff4d5a",
+    hairline: "#3a414b",
+    plateInk: "#17191e",
+    empty: "#21262d",
+    levels: ["#4c0d12", "#8b1a24", "#d7263d", "#ff6b6b"],
+  },
+  "-light": {
+    background: "#f6f8fa",
+    title: "#d7263d",
+    icon: "#d7263d",
+    text: "#24292f",
+    muted: "#59636e",
+    track: "#d1d9e0",
+    heading: "#1f2328",
+    frame: "#eef0f3",
+    signal: "#d7263d",
+    hairline: "#b8c0c9",
+    plateInk: "#17191e",
+    empty: "#e3e7eb",
+    levels: ["#ffc2c8", "#ff7a86", "#e5384c", "#a3101f"],
+  },
 };
+const FALLBACK_LANGUAGE_COLOR = "#8b949e";
 
 const TIME_ZONE = "America/Sao_Paulo";
 
@@ -253,7 +271,7 @@ function addRepositoryLanguages(weights, { repository, commits }) {
   const repositorySize = edges.reduce((total, edge) => total + edge.size, 0);
   if (repositorySize === 0) return;
   for (const edge of edges) {
-    const current = weights.get(edge.node.name) ?? { color: edge.node.color ?? palette.muted, weight: 0 };
+    const current = weights.get(edge.node.name) ?? { color: edge.node.color ?? FALLBACK_LANGUAGE_COLOR, weight: 0 };
     current.weight += (edge.size / repositorySize) * commits;
     weights.set(edge.node.name, current);
   }
@@ -281,7 +299,7 @@ async function featuredProjects(now) {
       stars: repository.stargazerCount,
       pushedAt: repository.pushedAt,
       homepage: repository.homepageUrl,
-      language: repository.primaryLanguage ?? { name: "—", color: palette.muted },
+      language: repository.primaryLanguage ?? { name: "—", color: FALLBACK_LANGUAGE_COLOR },
       totalCommits: history.all.totalCount,
       months: monthlyCommits(history.recent.nodes.map((node) => node.committedDate), now),
     });
@@ -292,7 +310,13 @@ async function featuredProjects(now) {
 async function writeProjectCards(now) {
   await mkdir(`${outputDirectory}/projects`, { recursive: true });
   for (const project of await featuredProjects(now)) {
-    await writeFile(`${outputDirectory}/projects/${project.name}.svg`, renderProjectCard({ project, now, palette }));
+    await writeThemed(`projects/${project.name}`, (palette) => renderProjectCard({ project, now, palette }));
+  }
+}
+
+async function writeThemed(name, render) {
+  for (const [suffix, palette] of Object.entries(PALETTES)) {
+    await writeFile(`${outputDirectory}/${name}${suffix}.svg`, render(palette));
   }
 }
 
@@ -306,7 +330,7 @@ async function main() {
   }
   const now = new Date();
   await mkdir(outputDirectory, { recursive: true });
-  await writeFile(`${outputDirectory}/header.svg`, renderHeader({ capturedAt: captureTimestamp(now), palette }));
+  await writeThemed("header", (palette) => renderHeader({ capturedAt: captureTimestamp(now), palette }));
   await writeProjectCards(now);
   if (process.env.STATS_ONLY_PROJECTS === "true") return;
   const { user } = await queryGitHub(ACCOUNT_QUERY, { login });
@@ -338,8 +362,7 @@ async function main() {
   const { dailyCounts, hourlyCounts } = await commitActivity(today);
   const total = [...dailyCounts.values()].reduce((sum, count) => sum + count, 0);
   await mkdir(outputDirectory, { recursive: true });
-  await writeFile(
-    `${outputDirectory}/stats.svg`,
+  await writeThemed("stats", (palette) =>
     renderStatsCard({
       title: "Atividade no GitHub",
       subtitle: `Inclui repositórios privados e da V4 Company · atualizado em ${generatedAt}`,
@@ -348,13 +371,14 @@ async function main() {
       palette,
     }),
   );
-  await writeFile(
-    `${outputDirectory}/contributions.svg`,
+  await writeThemed("contributions", (palette) =>
     renderContributionHeatmap({ dailyCounts, today, total, palette, subtitle: `Inclui repositórios privados e da V4 Company · atualizado em ${generatedAt}` }),
   );
-  await writeFile(`${outputDirectory}/languages.svg`, renderLanguagesCard({ languages: topLanguages(languageWeights(contributions), 8), palette }));
-  await writeFile(`${outputDirectory}/productive-time.svg`, renderProductiveTimeCard({ hourlyCounts, palette }));
-  await writeFile(`${outputDirectory}/merge-time.svg`, renderMergeTimeCard({ pullRequests: await mergedPullRequests(today), palette }));
+  const languages = topLanguages(languageWeights(contributions), 8);
+  const pullRequests = await mergedPullRequests(today);
+  await writeThemed("languages", (palette) => renderLanguagesCard({ languages, palette }));
+  await writeThemed("productive-time", (palette) => renderProductiveTimeCard({ hourlyCounts, palette }));
+  await writeThemed("merge-time", (palette) => renderMergeTimeCard({ pullRequests, palette }));
 }
 
 await main();
